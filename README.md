@@ -14,12 +14,12 @@ Implementación del CU 36 rediseñado con el patrón **Adapter** (GoF), para la 
 
 1. **API mock del GPS Tracker** (puerto 8080). En la carpeta `dsi-api-bolsines-main`:
    ```
-   mvnw.cmd spring-boot:run        (Windows)
+   .\mvnw.cmd spring-boot:run        (Windows)
    ./mvnw spring-boot:run          (Linux/Mac)
    ```
 2. **Esta aplicación** (puerto 8081). En esta carpeta:
    ```
-   mvnw.cmd spring-boot:run        (Windows)
+   .\mvnw.cmd spring-boot:run        (Windows)
    ./mvnw spring-boot:run          (Linux/Mac)
    ```
    También se puede abrir con IntelliJ y ejecutar `BolsinesApplication`.
