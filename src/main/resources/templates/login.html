@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bolsines · Iniciar sesión</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body class="fondo-login">
+<main class="tarjeta-login">
+    <h1>Bolsines</h1>
+    <p class="subtitulo">Gestión de bolsines entre Comisiones Médicas</p>
+
+    <div th:if="${error}" class="alerta error" th:text="${error}"></div>
+
+    <form method="post" th:action="@{/login}" class="formulario">
+        <label>Usuario
+            <input type="text" name="nombreUsuario" th:value="${nombreUsuario}" autofocus required>
+        </label>
+        <label>Contraseña
+            <input type="password" name="contrasena" required>
+        </label>
+        <button type="submit" class="btn ancho">Iniciar sesión</button>
+    </form>
+
+    <details class="usuarios-demo">
+        <summary>Usuarios de prueba (contraseña 1234)</summary>
+        <ul>
+            <li><code>eb.cordoba</code>: CM Córdoba Capital. Flujo principal, A2, A3, A4 y A5.</li>
+            <li><code>eb.rosario</code>: CM Rosario. Un bolsín enviado, se ubica con los 3 modelos.</li>
+            <li><code>eb.jujuy</code>: CM Jujuy. Sin bolsines enviados (A1).</li>
+        </ul>
+    </details>
+</main>
+</body>
+</html>

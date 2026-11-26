@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Consultar seguimiento de bolsines</title>
+    <link rel="stylesheet" th:href="@{/vendor/leaflet/leaflet.css}">
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body>
+<header class="barra">
+    <div class="marca">Bolsines <span class="sep">/</span> <span>CU 36 · Consultar seguimiento de bolsines</span></div>
+    <div class="barra-der">GPS Tracker del sistema: <strong th:text="${modeloGPSTracker}">XTR-4500L</strong></div>
+</header>
+
+<main class="contenedor">
+    <section class="encabezado">
+        <div>
+            <span class="etiqueta">Comisión Médica del usuario logueado</span>
+            <h1 th:text="${pantalla.lblCMUsuarioLogueado}">CM Córdoba Capital (CM-CBA-01)</h1>
+        </div>
+        <form th:unless="${pantalla.ventanaCerrada}" method="post" th:action="@{/seguimiento/cancelar}">
+            <button type="submit" class="btn secundario">Cancelar</button>
+        </form>
+        <a th:if="${pantalla.ventanaCerrada}" class="btn" th:href="@{/menu}">Volver al menú</a>
+    </section>
+
+    <!-- Mensajes -->
+    <div th:if="${pantalla.lblEjecucionExitosa != null}" class="alerta exito" th:text="${pantalla.lblEjecucionExitosa}"></div>
+    <div th:if="${pantalla.mensajeInformativo != null}" class="alerta info" th:text="${pantalla.mensajeInformativo}"></div>
+    <div th:if="${pantalla.mensajeAdvertencia != null}" class="alerta advertencia" th:text="${pantalla.mensajeAdvertencia}"></div>
+    <div th:if="${pantalla.mensajeError != null}" class="alerta error" th:text="${pantalla.mensajeError}"></div>
+
+    <!-- A3: bolsines que el GPS Tracker no pudo ubicar -->
+    <div th:if="${!pantalla.ventanaCerrada and !pantalla.bolsinesSinUbicacion.isEmpty()}" class="alerta advertencia">
+        <strong>El GPS Tracker no pudo informar la ubicación de estos bolsines:</strong>
+        <ul>
+            <li th:each="sinUbicacion : ${pantalla.bolsinesSinUbicacion}" th:text="${sinUbicacion.value}"></li>
+        </ul>
+    </div>
+
+    <section th:if="${pantalla.mapaDeBolsines != null and !pantalla.ventanaCerrada and !pantalla.bolsinesEnMapa.isEmpty()}" class="panel-mapa">
+
+        <form th:if="${pantalla.filtrosHabilitados}" class="filtros" method="get" th:action="@{/seguimiento/filtrar}">
+            <label>N° de precinto
+                <input type="text" name="numeroPrecinto" th:value="${pantalla.filtroPrecinto}" placeholder="Ej.: PR-0101">
+            </label>
+            <label>CM destino
+                <select name="codigoCMDestino">
+                    <option value="">Todas</option>
+                    <option th:each="opcion : ${pantalla.opcionesCMDestino}" th:value="${opcion.key}"
+                            th:text="${opcion.value + ' (' + opcion.key + ')'}"
+                            th:selected="${opcion.key == pantalla.filtroCMDestino}"></option>
+                </select>
+            </label>
+            <button type="submit" class="btn">Filtrar</button>
+            <a class="btn enlace" th:href="@{/seguimiento/filtrar}">Quitar filtro</a>
+        </form>
+
+        <p class="ayuda" th:if="${pantalla.seleccionHabilitada}">Seleccioná un bolsín en el mapa para informar su ubicación al Gerente de la CM destino.</p>
+
+        <div id="mapa" class="mapa"
+             th:attr="data-url=${pantalla.mapaDeBolsines.urlTeselas()},
+                      data-atribucion=${pantalla.mapaDeBolsines.atribucion()},
+                      data-lat=${pantalla.mapaDeBolsines.centroLatitud()},
+                      data-lon=${pantalla.mapaDeBolsines.centroLongitud()},
+                      data-zoom=${pantalla.mapaDeBolsines.zoom()},
+                      data-seleccion=${pantalla.seleccionHabilitada},
+                      data-seleccionado=${pantalla.bolsinAConfirmar}"></div>
+
+        <table class="tabla">
+            <thead>
+            <tr>
+                <th>N° bolsín</th>
+                <th>N° precinto</th>
+                <th>CM destino</th>
+                <th>Latitud</th>
+                <th>Longitud</th>
+                <th>Última actualización</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="b : ${pantalla.bolsinesEnMapa}" class="fila-bolsin"
+                th:classappend="${pantalla.bolsinAConfirmar != null and pantalla.bolsinAConfirmar == b.numeroBolsin()} ? 'seleccionada'"
+                th:attr="data-nro=${b.numeroBolsin()},
+                         data-lat=${b.latitud()},
+                         data-lon=${b.longitud()},
+                         data-precinto=${b.numeroPrecinto()},
+                         data-cm=${b.nombreCMDestino()},
+                         data-fecha=${b.fechaHoraUltimaActualizacion()}">
+                <td th:text="${b.numeroBolsin()}">101</td>
+                <td th:text="${b.numeroPrecinto()}">PR-0101</td>
+                <td th:text="${b.nombreCMDestino()}">CM Rosario</td>
+                <td th:text="${b.latitud()}">-31.4201</td>
+                <td th:text="${b.longitud()}">-64.1888</td>
+                <td th:text="${b.fechaHoraUltimaActualizacion()}">07/03/2026 12:30:00</td>
+                <td>
+                    <form th:if="${pantalla.seleccionHabilitada}" method="post" th:action="@{/seguimiento/seleccionar}">
+                        <input type="hidden" name="numeroBolsin" th:value="${b.numeroBolsin()}">
+                        <button type="submit" class="btn chico">Seleccionar</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <!-- formulario que usa el mapa al seleccionar un marcador -->
+    <form id="form-seleccion" method="post" th:action="@{/seguimiento/seleccionar}" hidden>
+        <input type="hidden" name="numeroBolsin" value="">
+    </form>
+
+    <!-- Paso 8: confirmación del envío del correo -->
+    <div th:if="${pantalla.bolsinAConfirmar != null}" class="modal-fondo">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="titulo-modal">
+            <h2 id="titulo-modal">Informar ubicación del bolsín</h2>
+            <p>¿Desea enviar un correo electrónico al Gerente de
+                <strong th:text="${pantalla.cmDestinoAConfirmar}">CM Rosario</strong>
+                para informar la ubicación del bolsín N° <strong th:text="${pantalla.bolsinAConfirmar}">101</strong>?</p>
+            <div class="acciones">
+                <form method="post" th:action="@{/seguimiento/confirmar}">
+                    <input type="hidden" name="confirma" value="false">
+                    <button type="submit" class="btn secundario">No enviar</button>
+                </form>
+                <form method="post" th:action="@{/seguimiento/confirmar}">
+                    <input type="hidden" name="confirma" value="true">
+                    <button type="submit" class="btn">Sí, enviar correo</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script th:src="@{/vendor/leaflet/leaflet.js}"></script>
+<script th:src="@{/js/mapa.js}"></script>
+</body>
+</html>

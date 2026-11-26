@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bolsines · Menú</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body>
+<header class="barra">
+    <div class="marca">Bolsines</div>
+    <form method="post" th:action="@{/logout}" class="barra-der">
+        <span th:text="${usuario.nombreUsuario}">eb.cordoba</span>
+        <button type="submit" class="btn enlace claro">Cerrar sesión</button>
+    </form>
+</header>
+
+<main class="contenedor">
+    <section class="encabezado">
+        <div>
+            <span class="etiqueta" th:text="${empleado != null ? empleado.cargo.nombre : ''}">Encargado de Bolsines</span>
+            <h1 th:text="${empleado != null ? 'Hola, ' + empleado.nombreCompleto : 'Hola'}">Hola</h1>
+            <p class="ayuda" th:if="${empleado != null}"
+               th:text="${empleado.obtenerComisionMedica().nombre + ' (' + empleado.obtenerComisionMedica().codigo + ')'}">CM</p>
+        </div>
+    </section>
+
+    <section class="opciones">
+        <a class="opcion" th:href="@{/seguimiento}">
+            <span class="opcion-titulo">Consultar seguimiento de bolsines</span>
+            <span class="opcion-texto">Ver en un mapa dónde están los bolsines enviados por tu CM e informar la ubicación al Gerente de la CM destino.</span>
+        </a>
+    </section>
+
+    <p class="nota">GPS Tracker configurado para el sistema: <strong th:text="${modeloGPSTracker}">XTR-4500L</strong>
+        (se cambia en <code>application.properties</code> → <code>gps.tracker.modelo</code>).</p>
+</main>
+</body>
+</html>
