@@ -63,8 +63,10 @@ gps.tracker.modelo=XTR-4500L          # o NavTrack QX-7A, o GeoPulse MTR-900
 Después de cambiarlo hay que reiniciar la app. También se puede elegir al arrancar, sin editar el archivo:
 
 ```
-mvnw.cmd spring-boot:run -Dspring-boot.run.arguments="--gps.tracker.modelo=GeoPulse MTR-900"
+.\mvnw.cmd spring-boot:run "-Dspring-boot.run.arguments=--gps.tracker.modelo=GeoPulse-MTR-900"
 ```
+
+En PowerShell todo el `-D...` va entre comillas, y el modelo se escribe sin espacios (`XTR-4500L`, `NavTrack-QX-7A`, `GeoPulse-MTR-900`): el sistema ignora guiones, espacios y mayúsculas al comparar el nombre.
 
 El modelo activo aparece arriba a la derecha de la pantalla del CU.
 
